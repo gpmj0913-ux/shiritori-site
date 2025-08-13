@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>しりとりサイト</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #chat { border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; }
+    #inputArea { margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>しりとりサイト</h1>
+  <div id="chat"></div>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="言葉を入力してね" />
+    <button onclick="userTurn()">送信</button>
+  </div>
+
+  <script>
+    const wordList = [
+      "りんご", "ごりら", "らっぱ", "ぱんだ", "だるま",
+      "apple", "elephant", "tiger", "rabbit", "table"
+    ];
+
+    let lastChar = "";  // 最後の文字を保存
+
+    function addMessage(text, isUser) {
+      const chat = document.getElementById("chat");
+      const div = document.createElement("div");
+      div.textContent = (isUser ? "あなた: " : "サイト: ") + text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function userTurn() {
+      const input = document.getElementById("userInput");
+      const word = input.value.trim().toLowerCase();
+      if (!word) return;
+
+      // 最初のターンは制限なし
+      if (lastChar && word[0] !== lastChar) {
+        alert(`言葉は「${lastChar}」から始まらないとダメだよ！`);
+        return;
+      }
+
+      addMessage(word, true);
+
+      // 最後の文字を取得（日本語なら「ん」を特別扱いしない簡単版）
+      lastChar = word[word.length - 1];
+      if (lastChar === "ん") {
+        addMessage("「ん」で終わったからあなたの負け！ゲーム終了。", false);
+        document.getElementById("userInput").disabled = true;
+        return;
+      }
+
+      // サイトのターン
+      setTimeout(computerTurn, 500);
+      input.value = "";
+    }
+
+    function computerTurn() {
+      const possibleWords = wordList.filter(w => w[0] === lastChar);
+      if (possibleWords.length === 0) {
+        addMessage("もう言葉が見つからない！あなたの勝ち！", false);
+        document.getElementById("userInput").disabled = true;
+        return;
+      }
+      const choice = possibleWords[Math.floor(Math.random() * possibleWords.length)];
+      addMessage(choice, false);
+      lastChar = choice[choice.length - 1];
+      if (lastChar === "ん") {
+        addMessage("サイトが「ん」で終わった！あなたの勝ち！ゲーム終了。", false);
+        document.getElementById("userInput").disabled = true;
+      }
+    }
+  </script>
+</body>
+</html>
